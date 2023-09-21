@@ -10,7 +10,7 @@
     extention: string;
     search_word: string;
     deselection: string;
-    is_dir:boolean;
+    is_dir: boolean;
   };
 
   type SearchResultStatus = {
@@ -21,10 +21,11 @@
   let selected_dir: string = "";
   let search_word: string = "";
   let file_extention: string = "";
-  let is_dir:boolean=false;
+  let is_dir: boolean = false;
+  let is_file_open = false;
 
   let search_result: SearchResultStatus = { items: [], message: "" };
-  $: app_message = search_result.message;
+  let app_message = "";
 
   async function search_items() {
     let intoken: SearchToken = {
@@ -32,10 +33,20 @@
       extention: file_extention,
       search_word: search_word,
       deselection: "",
-      is_dir:is_dir,
+      is_dir: is_dir,
     };
 
     search_result = await invoke("search", { token: intoken });
+  }
+
+  function search_handler() {
+    search_items()
+      .then(() => {
+        app_message = search_result.message;
+      })
+      .catch((err) => {
+        app_message = err;
+      });
   }
 </script>
 
@@ -43,31 +54,47 @@
   {#if selected_dir !== ""}
     <div class="row">
       <FileDialog bind:selected_dir />
-      <Inputline bind:invalue={search_word} inplace="Search word" />
-      <Inputline bind:invalue={file_extention} inplace="Extention" />
-      <button on:click={search_items}> Search </button>
-      <ClearButton bind:search_word bind:file_extention />
-      
+      <form on:submit|preventDefault={search_handler}>
+        <Inputline bind:invalue={search_word} inplace="Search word" />
+      </form>
+      <form on:submit|preventDefault={search_handler}>
+        <Inputline bind:invalue={file_extention} inplace="Extention" />
+      </form>
+      <ClearButton
+        bind:search_word
+        bind:file_extention
+        bind:items={search_result.items}
+        bind:is_file_open
+        bind:app_message
+      />
     </div>
   {:else}
     <FileDialog bind:selected_dir />
   {/if}
 
-  <div class="row" id="infobar">
-    {#if selected_dir !== ""}
-      <div style="margin-right: auto;">
-        {"対象=>"}{selected_dir}
-      </div>
-      <input type="checkbox" bind:checked={is_dir}>フォルダを含める
-    {/if}
-    <div style="margin-left: auto;">
-      {app_message}
+  <div id="infobar">
+    <div class="row">
+      {#if selected_dir !== ""}
+        <div style="margin-right: auto;">
+          {"対象=>"}{selected_dir.slice(-45)}
+        </div>
+        {#if search_result.items.length === 0}
+          <input type="checkbox" bind:checked={is_dir} />フォルダを含める
+        {:else}
+          <input type="checkbox" bind:checked={is_file_open} />ファイルを開く
+        {/if}
+        <div style="margin-left: auto;margin-right:1em">
+          {app_message}
+        </div>
+      {/if}
     </div>
-
   </div>
-
   {#if search_result.items.length !== 0}
-    <ResultList bind:app_message result_items={search_result.items} />
+    <ResultList
+      bind:app_message
+      result_items={search_result.items}
+      {is_file_open}
+    />
   {/if}
 </main>
 

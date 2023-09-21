@@ -2,7 +2,7 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 use serde::{Deserialize, Serialize};
-
+use std::{path::PathBuf, str::FromStr};
 mod sleuengine;
 // Learn more about Tauri commands at https://tauri.app/v1/guides/features/command
 
@@ -12,7 +12,7 @@ struct SearchToken {
     extention: String,
     search_word: String,
     deselection: String,
-    is_dir:bool,
+    is_dir: bool,
 }
 
 #[derive(Serialize, Deserialize)]
@@ -52,9 +52,16 @@ async fn search(token: SearchToken) -> SearchResultStatus {
 }
 
 #[tauri::command]
-fn open_item(inpath: &str) -> String {
-    match sleuengine::opendir(inpath) {
-        Ok(_) => format!("{} is opened", inpath),
+fn open_item(inpath: &str, is_file_open: bool) -> String {
+    let itempath = PathBuf::from_str(inpath).unwrap();
+    match sleuengine::opendir(&itempath, is_file_open) {
+        Ok(_) => {
+            if is_file_open {
+                "ファイルを開きました".to_string()
+            } else {
+                "フォルダを開きました".to_string()
+            }
+        }
         Err(e) => e.to_string(),
     }
 }

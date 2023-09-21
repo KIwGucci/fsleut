@@ -2,9 +2,13 @@
     import { invoke } from "@tauri-apps/api";
     export let result_items: string[];
     export let app_message: string;
+    export let is_file_open: boolean;
 
-    async function open_item(gopath: string) {
-        app_message = await invoke("open_item", { inpath: gopath });
+    async function open_item(gopath: string, is_file_open: boolean) {
+        app_message = await invoke("open_item", {
+            inpath: gopath,
+            isFileOpen: is_file_open,
+        });
     }
 </script>
 
@@ -13,7 +17,10 @@
         {#each result_items as finditem}
             <!-- svelte-ignore a11y-click-events-have-key-events -->
             <!-- svelte-ignore a11y-no-noninteractive-element-interactions -->
-            <li on:click={() => open_item(finditem)} class="findlist">
+            <li
+                on:click={() => open_item(finditem, is_file_open)}
+                class="findlist"
+            >
                 {finditem}
             </li>
         {/each}

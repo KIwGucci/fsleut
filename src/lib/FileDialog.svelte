@@ -25,13 +25,13 @@
 </script>
 
 {#if selected_dir === ""}
-    <button on:click={select}> 対象フォルダ選択 </button>
+    <button on:click|preventDefault={select}> 対象フォルダ選択 </button>
 {:else}
-    <button on:click={select}> 対象変更 </button>
+    <button on:click|preventDefault={select}> 対象変更 </button>
 {/if}
 
 <style>
-  :focus {
-    border-color: rgb(85, 85, 201);
-  }
+    :focus {
+        border-color: rgb(85, 85, 201);
+    }
 </style>

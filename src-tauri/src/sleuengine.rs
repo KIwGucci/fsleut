@@ -2,7 +2,6 @@ extern crate globmatch;
 use std::error::Error;
 use std::path::{Path, PathBuf};
 use std::process::Command;
-use std::str::FromStr;
 
 // 検索結果を返す最大数
 pub const MAX_RESULT_LEN: usize = 3000;
@@ -32,8 +31,7 @@ pub fn item_search(
         let mut jud = false;
         let searchwords = searchword.split_whitespace();
 
-        // let path_string = x.to_string_lossy().to_lowercase();
-        let path_string = if is_dir {
+        let path_string: String = if is_dir {
             x.to_string_lossy().to_lowercase()
         } else {
             match x.file_name() {
@@ -77,24 +75,34 @@ pub fn item_search(
     Ok(result)
 }
 
-pub fn opendir(fpath: &str) -> Result<(), Box<dyn Error>> {
-    match PathBuf::from_str(fpath) {
-        Ok(fpath) => {
-            // 対象ファイルのフォルダをファインダーで開く
-            #[cfg(target_os = "macos")]
-            Command::new("open").arg(fpath.parent().unwrap()).spawn()?;
+pub fn opendir(fpath: &PathBuf, is_file_open: bool) -> Result<(), Box<dyn Error>> {
+    // 対象ファイルのフォルダをファインダーで開く
+    if is_file_open {
+        #[cfg(target_os = "macos")]
+        Command::new("open").arg(fpath).spawn()?;
 
-            #[cfg(target_os = "windows")]
-            Command::new("explorer")
-                .arg(fpath.parent().unwrap())
-                .spawn()?;
+        #[cfg(target_os = "windows")]
+        Command::new("explorer")
+            .arg(fpath.parent().unwrap())
+            .spawn()?;
 
-            #[cfg(target_os = "linux")]
-            Command::new("xdg-open")
-                .arg(fpath.parent().unwrap())
-                .spawn()?;
-            Ok(())
-        }
-        Err(e) => Err(e.into()),
+        #[cfg(target_os = "linux")]
+        Command::new("xdg-open")
+            .arg(fpath.parent().unwrap())
+            .spawn()?;
+    } else {
+        #[cfg(target_os = "macos")]
+        Command::new("open").arg(fpath.parent().unwrap()).spawn()?;
+
+        #[cfg(target_os = "windows")]
+        Command::new("explorer")
+            .arg(fpath.parent().unwrap())
+            .spawn()?;
+
+        #[cfg(target_os = "linux")]
+        Command::new("xdg-open")
+            .arg(fpath.parent().unwrap())
+            .spawn()?;
     }
+    Ok(())
 }
