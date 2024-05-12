@@ -4,7 +4,7 @@
   import Inputline from "./lib/Inputline.svelte";
   import ResultList from "./lib/ResultList.svelte";
   import ClearButton from "./lib/ClearButton.svelte";
-
+  import Select from "./lib/Select.svelte";
   type SearchToken = {
     root_path: string;
     extention: string;
@@ -67,6 +67,7 @@
         bind:is_file_open
         bind:app_message
       />
+      <Select bind:is_file_open />
     </div>
   {:else}
     <FileDialog bind:selected_dir />
@@ -78,11 +79,6 @@
         <div style="margin-right: auto;">
           {"対象=>"}{selected_dir.slice(-45)}
         </div>
-        {#if search_result.items.length === 0}
-          <input type="checkbox" bind:checked={is_dir} />フォルダを含める
-        {:else}
-          <input type="checkbox" bind:checked={is_file_open} />ファイルを開く
-        {/if}
         <div style="margin-left: auto;margin-right:1em">
           {app_message}
         </div>
@@ -99,12 +95,6 @@
 </main>
 
 <style>
-  /* .row {
-    display: flex;
-    justify-content: space-between;
-    font-size: medium;
-    align-items: center;
-  } */
   #infobar {
     color: rgb(255, 255, 255);
     padding: 0rem 0.5rem;

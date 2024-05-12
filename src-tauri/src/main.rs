@@ -53,7 +53,10 @@ async fn search(token: SearchToken) -> SearchResultStatus {
 
 #[tauri::command]
 fn open_item(inpath: &str, is_file_open: bool) -> String {
-    let itempath = PathBuf::from_str(inpath).unwrap();
+    let itempath = match PathBuf::from_str(inpath) {
+        Ok(path) => path,
+        Err(e) => return e.to_string(),
+    };
     match sleuengine::opendir(&itempath, is_file_open) {
         Ok(_) => {
             if is_file_open {
