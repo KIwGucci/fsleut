@@ -60,22 +60,16 @@ pub fn item_search(
 
     // 検索語でフィルタ処理
 
-    let paths: Vec<PathBuf> = builder
+    let paths = builder
         .into_iter()
         .filter_entry(|p| !globmatch::is_hidden_entry(p))
         .flatten()
-        .filter(is_matchword)
-        .collect();
+        .filter(is_matchword);
 
-    let mut result: Vec<String> = vec![];
-    for p in paths.iter() {
-        // 結果の数が上限を満たすまで処理
-        if result.len() > MAX_RESULT_LEN {
-            break;
-        } else {
-            result.push(p.to_string_lossy().to_string());
-        }
-    }
+    let result: Vec<String> = paths
+        .map(|p| p.to_string_lossy().to_string())
+        .take(MAX_RESULT_LEN)
+        .collect();
     Ok(result)
 }
 
