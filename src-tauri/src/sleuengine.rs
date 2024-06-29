@@ -10,8 +10,6 @@ pub fn item_search(
     rootpath: &str,
     extention: &str,
     searchword: &str,
-    deselection: &str,
-    is_dir: bool,
 ) -> Result<Vec<String>, String> {
     let in_extention = if extention.is_empty() { "*" } else { extention };
     // 拡張子
@@ -22,56 +20,36 @@ pub fn item_search(
         .case_sensitive(false)
         .build(rootpath)?;
 
-    //対象ワードにマッチするか判定しboolを返すクロージャ
-    let is_matchword = |x: &PathBuf| {
-        if searchword.is_empty() {
-            return true;
-        }
-
-        let searchwords = searchword.split_whitespace();
-
-        let path_string: String = if is_dir {
-            // 関数の引数でディレクトリ対象のフラグがTrueであれば
-            x.to_string_lossy().to_lowercase()
-        } else {
-            // そうでなければファイル名のみを検索対象とする
-            match x.file_name() {
-                Some(filename) => filename.to_string_lossy().to_lowercase(),
-                None => "".to_owned(),
-            }
-        };
-
-        let mut jud = false;
-        if !deselection.is_empty() && path_string.contains(&deselection.to_lowercase()) {
-            // 除外ワードを含んでいればfalse
-            jud = false;
-        } else {
-            // 検索語を含むか確認
-            for wd in searchwords {
-                jud = path_string.contains(&wd.to_lowercase());
-                if !jud {
-                    // wdワードを含んでないときはjudはfalseで即座にbreak
-                    break;
-                }
-            }
-        }
-
-        jud
-    };
-
     // 検索語でフィルタ処理
 
     let paths = builder
         .into_iter()
         .filter_entry(|p| !globmatch::is_hidden_entry(p))
         .flatten()
-        .filter(is_matchword);
+        .filter(|p| is_matchword(p, searchword))
+        .take(MAX_RESULT_LEN);
 
-    let result: Vec<String> = paths
-        .map(|p| p.to_string_lossy().to_string())
-        .take(MAX_RESULT_LEN)
-        .collect();
+    let result: Vec<String> = paths.map(|p| p.to_string_lossy().to_string()).collect();
     Ok(result)
+}
+fn is_matchword(itempath: &Path, searchword: &str) -> bool {
+    if searchword.trim().is_empty() {
+        return true;
+    }
+
+    let path_string = itempath.to_string_lossy();
+    let mut jud = false;
+    let searchwords = searchword.split_whitespace();
+
+    // 検索語を全て含むか確認
+    for wd in searchwords {
+        jud = path_string.contains(&wd.to_lowercase());
+        if !jud {
+            // wdワードを含んでないときはjudはfalseで即座にbreak
+            break;
+        }
+    }
+    jud
 }
 
 pub fn opendir(fpath: &PathBuf, is_file_open: bool) -> Result<(), io::Error> {

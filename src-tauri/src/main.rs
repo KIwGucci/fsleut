@@ -11,8 +11,6 @@ struct SearchToken {
     root_path: String,
     extention: String,
     search_word: String,
-    deselection: String,
-    is_dir: bool,
 }
 
 #[derive(Serialize, Deserialize)]
@@ -23,13 +21,7 @@ struct SearchResultStatus {
 
 #[tauri::command]
 async fn search(token: SearchToken) -> SearchResultStatus {
-    match sleuengine::item_search(
-        &token.root_path,
-        &token.extention,
-        &token.search_word,
-        &token.deselection,
-        token.is_dir,
-    ) {
+    match sleuengine::item_search(&token.root_path, &token.extention, &token.search_word) {
         Ok(rst) => {
             let rstlen = &rst.len();
 

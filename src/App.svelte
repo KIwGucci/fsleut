@@ -9,8 +9,6 @@
     root_path: string;
     extention: string;
     search_word: string;
-    deselection: string;
-    is_dir: boolean;
   };
 
   type SearchResultStatus = {
@@ -21,7 +19,6 @@
   let selected_dir: string = "";
   let search_word: string = "";
   let file_extention: string = "";
-  let is_dir: boolean = false;
   let is_file_open = false;
 
   let search_result: SearchResultStatus = { items: [], message: "" };
@@ -32,8 +29,6 @@
       root_path: selected_dir,
       extention: file_extention,
       search_word: search_word,
-      deselection: "",
-      is_dir: is_dir,
     };
 
     search_result = await invoke("search", { token: intoken });
@@ -85,6 +80,7 @@
       {/if}
     </div>
   </div>
+
   {#if search_result.items.length !== 0}
     <ResultList
       bind:app_message
