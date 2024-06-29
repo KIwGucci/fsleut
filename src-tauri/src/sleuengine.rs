@@ -24,7 +24,10 @@ pub fn item_search(
 
     //対象ワードにマッチするか判定しboolを返すクロージャ
     let is_matchword = |x: &PathBuf| {
-        let mut jud = false;
+        if searchword.is_empty() {
+            return true;
+        }
+
         let searchwords = searchword.split_whitespace();
 
         let path_string: String = if is_dir {
@@ -38,12 +41,10 @@ pub fn item_search(
             }
         };
 
+        let mut jud = false;
         if !deselection.is_empty() && path_string.contains(&deselection.to_lowercase()) {
             // 除外ワードを含んでいればfalse
             jud = false;
-        } else if searchword.is_empty() {
-            // 検索語が空の時は全てtrue
-            jud = true
         } else {
             // 検索語を含むか確認
             for wd in searchwords {
