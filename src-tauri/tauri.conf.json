@@ -8,7 +8,7 @@
   },
   "package": {
     "productName": "fsleut",
-    "version": "0.0.0"
+    "version": "0.0.1"
   },
   "tauri": {
     "allowlist": {
@@ -17,11 +17,11 @@
         "all": false,
         "open": true
       },
-      "dialog":{
-        "open":true
+      "dialog": {
+        "open": true
       },
-      "path":{
-        "all":true
+      "path": {
+        "all": true
       }
     },
     "bundle": {
